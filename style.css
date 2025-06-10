@@ -1,4 +1,4 @@
-/* YENİ: Mobil ekrandaki taşma sorununu çözen ve genel bir standart olan kural */
+/* Mobil ekrandaki taşma sorununu çözen ve genel bir standart olan kural */
 *,
 *::before,
 *::after {
@@ -26,12 +26,16 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     margin: 0;
-    padding: 1rem;
+    /* KALDIRILDI: Bu padding, mobil taşma sorununa neden oluyordu. */
+    /* padding: 1rem; */
+    /* YENİ: Yatay kaydırma çubuğunun çıkmasını kesin olarak engeller. */
+    overflow-x: hidden;
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
+    /* GÜNCELLENDİ: Sayfanın kenar boşlukları artık sadece bu element tarafından yönetilecek. */
     padding: 1rem;
 }
 
@@ -143,10 +147,8 @@ header {
     font-weight: 600;
     margin: 0;
     line-height: 1.5;
-    /* YENİ: Çok satırlı soru metinlerinin doğru görüntülenmesini sağlar */
     white-space: pre-wrap;
     word-break: break-word;
-    /* Çok uzun kelimelerin taşmasını engeller */
 }
 
 .admin-actions {
@@ -206,10 +208,8 @@ header {
     cursor: default;
     font-size: 0.9rem;
     line-height: 1.6;
-    /* YENİ: Çok satırlı açıklama metinlerinin doğru görüntülenmesini sağlar */
     white-space: pre-wrap;
     word-break: break-word;
-    /* Çok uzun kelimelerin taşmasını engeller */
 }
 
 @keyframes shake {

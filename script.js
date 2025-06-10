@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- FIREBASE BİLGİLERİ ---
+// --- KENDİ FIREBASE BİLGİLERİNİZİ BURAYA YAPIŞTIRIN ---
 const firebaseConfig = {
     apiKey: "AIzaSyC02gtpAVVPjugLBo2POxaxl6hHq8n9Ofg",
     authDomain: "github-mywebsitedrafts.firebaseapp.com",
@@ -28,7 +28,7 @@ const adminCodeInput = document.getElementById('admin-code-input');
 const modalCancelBtn = document.getElementById('modal-cancel-btn');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
 
-const ADMIN_CODE_HASH = "a2dd933588052c16311d153be5693101811c776df67af5cd7244172a0430b221";
+const ADMIN_CODE_HASH = "1739f86da44b2f567b545a198c6007e06803721342616f4619379854c6e6e87d";
 let isAdminMode = false;
 let localQuestions = [];
 
@@ -66,14 +66,20 @@ const renderQuestions = (questionsToRender) => {
     feather.replace({ width: '18px', height: '18px' });
 };
 
-// Soru kartı HTML'ini oluşturan yardımcı fonksiyon
+
+// GÜNCELLENDİ: Soru kartı HTML'ini oluşturan yardımcı fonksiyon
 function createQuestionCard(q) {
     const questionCard = document.createElement('div');
     questionCard.className = 'question-card';
+
+    // YENİ: Metindeki alt satır karakterlerini (\n) HTML'in anlayacağı <br> etiketine çeviriyoruz.
+    const formattedQuestion = q.question.replace(/\n/g, '<br>');
+    const formattedExplanation = q.explanation ? q.explanation.replace(/\n/g, '<br>') : '';
+
     questionCard.innerHTML = `
         <div class="question-header">
             <div class="question-content">
-                <h3>${q.question}</h3>
+                <h3>${formattedQuestion}</h3>
             </div>
             <div class="admin-actions">
                 ${isAdminMode ? `<button class="delete-btn" onclick="deleteQuestion('${q.id}')">Sil</button>` : ''}
@@ -82,7 +88,7 @@ function createQuestionCard(q) {
         <ul class="options-list">
             ${q.options.map(option => `<li class="option" onclick="checkAnswer(this, '${q.id}', '${option.replace(/'/g, "\\'")}')">${option}</li>`).join('')}
         </ul>
-        ${q.explanation ? `<div class="explanation-box hidden" id="explanation-${q.id}">${q.explanation}</div>` : ''}
+        ${q.explanation ? `<div class="explanation-box hidden" id="explanation-${q.id}">${formattedExplanation}</div>` : ''}
     `;
     return questionCard;
 }
