@@ -44,7 +44,8 @@ async function sha256(message) {
 // Soruları veritabanından dinle ve işle
 onSnapshot(collection(db, 'questions'), (snapshot) => {
     localQuestions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-    localQuestions.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+    // YENİ SATIR: Soruları rastgele karıştırır.
+    localQuestions.sort(() => Math.random() - 0.5);
     renderQuestions(localQuestions);
 });
 
