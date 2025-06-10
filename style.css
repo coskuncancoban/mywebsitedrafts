@@ -1,3 +1,10 @@
+/* YENİ: Mobil ekrandaki taşma sorununu çözen ve genel bir standart olan kural */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 /* Genel Stil ve Renk Paleti */
 :root {
     --bg-primary: #111827;
@@ -123,7 +130,6 @@ header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    /* İkonu sağa yaslamak için */
     gap: 1rem;
     margin-bottom: 1rem;
 }
@@ -137,6 +143,10 @@ header {
     font-weight: 600;
     margin: 0;
     line-height: 1.5;
+    /* YENİ: Çok satırlı soru metinlerinin doğru görüntülenmesini sağlar */
+    white-space: pre-wrap;
+    word-break: break-word;
+    /* Çok uzun kelimelerin taşmasını engeller */
 }
 
 .admin-actions {
@@ -196,6 +206,10 @@ header {
     cursor: default;
     font-size: 0.9rem;
     line-height: 1.6;
+    /* YENİ: Çok satırlı açıklama metinlerinin doğru görüntülenmesini sağlar */
+    white-space: pre-wrap;
+    word-break: break-word;
+    /* Çok uzun kelimelerin taşmasını engeller */
 }
 
 @keyframes shake {
@@ -323,6 +337,7 @@ header {
     background-color: #059669;
 }
 
+/* Yönetici Giriş Penceresi Stilleri */
 #admin-modal {
     position: fixed;
     inset: 0;
