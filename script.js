@@ -28,7 +28,7 @@ const adminCodeInput = document.getElementById('admin-code-input');
 const modalCancelBtn = document.getElementById('modal-cancel-btn');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
 
-const ADMIN_CODE_HASH = "1739f86da44b2f567b545a198c6007e06803721342616f4619379854c6e6e87d";
+const ADMIN_CODE_HASH = "a2dd933588052c16311d153be5693101811c776df67af5cd7244172a0430b221";
 let isAdminMode = false;
 let localQuestions = [];
 
