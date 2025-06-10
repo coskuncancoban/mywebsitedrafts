@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Programlama I - Sınav</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>Python Programlama I</h1>
+                <p class="subtitle">Bu sayfa, Python Programlama I ders materyallerinden yararlanarak yapay zeka ile
+                    oluşturulmuş örnek sorular içerir. Çalışmak ve yardımlaşmak amacı ile oluşturulmuştur. Başarılar!
+                </p>
+                <p class="author-name">coskuncancoban</p>
+            </div>
+            <div class="controls">
+                <button id="shuffle-btn" title="Soruları Karıştır">Karıştır</button>
+                <div id="admin-icon" title="Yönetici Paneli" class="admin-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+            </div>
+        </header>
+
+        <main id="quiz-container">
+            <p id="loading-message">Sorular yükleniyor...</p>
+        </main>
+
+        <section id="admin-panel" class="hidden">
+            <h2>Yönetici Paneli</h2>
+            <form id="add-question-form">
+                <div class="form-group">
+                    <label for="question-text">Soru Metni</label>
+                    <textarea id="question-text" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="question-explanation">Doğru Cevap Açıklaması</label>
+                    <textarea id="question-explanation" rows="2" required
+                        placeholder="Soru doğru cevaplandığında görünecek açıklama metni..."></textarea>
+                </div>
+                <div class="options-grid">
+                    <div class="option-input-group">
+                        <label>Seçenek 1</label>
+                        <div><input type="radio" name="correct-answer" value="0" checked><input type="text"
+                                name="option" required></div>
+                    </div>
+                    <div class="option-input-group">
+                        <label>Seçenek 2</label>
+                        <div><input type="radio" name="correct-answer" value="1"><input type="text" name="option"
+                                required></div>
+                    </div>
+                    <div class="option-input-group">
+                        <label>Seçenek 3</label>
+                        <div><input type="radio" name="correct-answer" value="2"><input type="text" name="option"
+                                required></div>
+                    </div>
+                    <div class="option-input-group">
+                        <label>Seçenek 4</label>
+                        <div><input type="radio" name="correct-answer" value="3"><input type="text" name="option"
+                                required></div>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Soruyu Ekle</button>
+            </form>
+        </section>
+    </div>
+
+    <div id="admin-modal" class="hidden">
+        <div class="modal-content">
+            <h3>Yönetici Doğrulaması</h3>
+            <p>Lütfen yönetici kodunu girin.</p><input type="password" id="admin-code-input">
+            <div class="modal-actions"><button id="modal-cancel-btn">İptal</button><button
+                    id="modal-submit-btn">Onayla</button></div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+        });
+    </script>
+</body>
+
+</html>
