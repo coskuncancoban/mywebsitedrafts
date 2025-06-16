@@ -18,7 +18,9 @@ const firebaseConfig = {
     storageBucket: "github-mywebsitedrafts.firebasestorage.app",
     messagingSenderId: "554051400137",
     appId: "1:554051400137:web:16a5ebde5deb7b0b187818",
-    measurementId: "G-7R6G23563M"
+    measurementId: "G-7R6G23563M",
+    databaseURL: "https://github-mywebsitedrafts-default-rtdb.europe-west1.firebasedatabase.app/"
+
 };
 // ----------------------------------------------------
 
