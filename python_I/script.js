@@ -217,7 +217,6 @@ adminCodeInput.addEventListener('keyup', e => e.key === 'Enter' && modalSubmitBt
 
 
 // Her dersin kendi anlık kullanıcı sayacının olması için yolu dinamik olarak alıyoruz
-// Örneğin /python/ sayfası için 'python' kelimesini alır
 const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
 const presenceRef = ref(rtdb, `presence/${coursePath}`);
 
@@ -234,20 +233,16 @@ let currentUsers = {};
 
 // 1. Kullanıcı online olduğunda çalışacak mantık
 const myConnectionRef = push(presenceRef); // Veritabanında bu kullanıcı için benzersiz bir yer oluştur
-onDisconnect(myConnectionRef).remove();      // Tarayıcı kapandığında veya bağlantı koptuğunda, bu kaydı otomatik sil
-set(myConnectionRef, { name: myRandomName, icon: myRandomIcon }); // Veritabanına kendi rastgele bilgilerimizi yaz
+onDisconnect(myConnectionRef).remove();      // Tarayıcı kapandığında bu kaydı otomatik sil
+set(myConnectionRef, { name: myRandomName, icon: myRandomIcon }); // Veritabanına kendi bilgilerimizi yaz
 
 // 2. Bildirim gösterme ve gizleme fonksiyonu
 let notificationTimeout;
 function showNotification(message, type = 'join') {
     if (!notificationElement) return;
-    
-    clearTimeout(notificationTimeout); // Önceki bildirimi temizle
-
+    clearTimeout(notificationTimeout);
     notificationElement.textContent = message;
-    notificationElement.className = type; // CSS'te '.join' veya '.leave' stilini uygular
-    
-    // 4 saniye sonra bildirimi gizle
+    notificationElement.className = type;
     notificationTimeout = setTimeout(() => {
         notificationElement.className = 'hidden';
     }, 4000);
@@ -256,9 +251,7 @@ function showNotification(message, type = 'join') {
 // 3. Online kullanıcı listesini ekrana çizen fonksiyon
 function renderUserList(users) {
     if (!userListElement) return;
-    userListElement.innerHTML = ''; // Her güncellemede listeyi temizle
-    
-    // Kullanıcı objesindeki her bir kişi için HTML oluştur
+    userListElement.innerHTML = '';
     for (const key in users) {
         const user = users[key];
         const userDiv = document.createElement('div');
@@ -273,26 +266,19 @@ function renderUserList(users) {
 
 // 4. Ana Dinleyici: Veritabanındaki 'presence' listesindeki her değişikliği dinle
 onValue(presenceRef, (snapshot) => {
-    const newUsers = snapshot.val() || {}; // Gelen yeni kullanıcı listesi
-    
-    // Gelen ve ayrılan kullanıcıları tespit et ve bildirimi göster
-    // Yeni bir kullanıcı gelmişse:
+    const newUsers = snapshot.val() || {};
+    // Gelen ve ayrılan kullanıcıları tespit et
     for (const key in newUsers) {
-        if (!currentUsers[key]) {
-            // Sayfayı açan kişinin kendisi için "geldi" bildirimi gösterme
-            if (key !== myConnectionRef.key) {
-                 showNotification(`${newUsers[key].name} geldi`, 'join');
-            }
+        if (!currentUsers[key] && key !== myConnectionRef.key) {
+            showNotification(`${newUsers[key].name} geldi`, 'join');
         }
     }
-    // Bir kullanıcı ayrılmışsa:
     for (const key in currentUsers) {
         if (!newUsers[key]) {
             showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
         }
     }
-    
-    // Lokal kullanıcı listemizi ve ekrandaki görüntüyü güncelle
+    // Mevcut kullanıcı listesini ve arayüzü güncelle
     currentUsers = newUsers;
     renderUserList(currentUsers);
 });
