@@ -450,3 +450,102 @@ header {
 .hidden {
     display: none !important;
 }
+
+/* =============================================== */
+/* YENİ: ANLIK KULLANICI GÖSTERGESİ STİLLERİ      */
+/* =============================================== */
+
+/* Ana kapsayıcıyı ekranın sağ üstüne sabitler */
+.presence-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    /* Diğer tüm elementlerin üzerinde olmasını sağlar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Kullanıcı listesinin kendisi */
+#presence-user-list {
+    display: flex;
+    flex-direction: column;
+    /* İkonları alt alta dizer */
+    gap: 8px;
+    /* İkonlar arası boşluk */
+    align-items: center;
+}
+
+/* Tek bir kullanıcının (ikon + isim) kapsayıcısı */
+.presence-user {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    animation: fadeIn 0.5s ease-in-out;
+    /* Yeni kullanıcı geldiğinde yumuşak bir giriş efekti */
+}
+
+/* Dairesel profil ikonu */
+.presence-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+    /* Resmin daireye tam sığmasını sağlar */
+}
+
+/* Kullanıcı adı metni */
+.presence-name {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+/* Geldi/Ayrıldı bildirim balonu */
+#presence-notification {
+    background-color: var(--accent-green);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(20px);
+    /* Aşağıdan gelme efekti için başlangıç pozisyonu */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    /* Üzerine tıklanmasını engeller */
+}
+
+/* Bildirim göründüğünde uygulanacak stiller */
+#presence-notification:not(.hidden) {
+    opacity: 1;
+    transform: translateY(0);
+    /* Normal pozisyonuna gelir */
+}
+
+/* Ayrılan kullanıcılar için bildirim rengi */
+#presence-notification.leave {
+    background-color: var(--accent-red);
+}
+
+/* Yeni kullanıcılar için giriş animasyonu */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

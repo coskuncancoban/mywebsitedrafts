@@ -176,3 +176,129 @@ modalSubmitBtn.addEventListener('click', async () => {
 });
 
 adminCodeInput.addEventListener('keyup', e => e.key === 'Enter' && modalSubmitBtn.click());
+
+// =========================================================================
+// YENİ: ANLIK KULLANICI GÖSTERGESİ SİSTEMİ
+// =========================================================================
+
+// Gerekli Realtime Database fonksiyonlarını Firebase'den import ediyoruz
+import { getDatabase, ref, onValue, onDisconnect, set, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+// --- HAZIRLIK: Kendi Varlıklarınızı (Assets) Buraya Girin ---
+
+// Yapay zeka ile ürettiğiniz ikonların linklerini bu diziye ekleyin.
+// Örnek: 'images/icon1.png' veya tam URL 'https://.../icon1.png'
+const profileIcons = [
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/1.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/2.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/3.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/4.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/5.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/6.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/7.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/8.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/9.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/10.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/11.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/12.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/13.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/14.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/15.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/16.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/17.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/18.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/19.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/20.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/21.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/22.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/23.png'
+];
+
+// Gösterilecek rastgele kullanıcı adlarını bu diziye ekleyin
+const userNames = ['Pufpuf', 'Gıcık', 'Tırtıl', 'Zıpır', 'Laklak', 'Fırt', 'Şapşik', 'Çıtpıt', 'Pıtırtı', 'Uykucu', 'Hışır', 'Zıpzıp', 'Köpük', 'Minnoş', 'Vızvız', 'Yumuş', 'Fırfır', 'Kıpır', 'Hınzır', 'Şaşkın', 'Bıcır', 'Fıstık', 'Mırıltı', 'Pıtırcık', 'Gıdık', 'Pofidik', 'Bıcırık', 'Mırnav', 'Böcük', 'Fışfış', 'Cingil', 'Pofidik', 'Gıtır', 'Hışırtı', 'Kıvırcık', 'Pırsık', 'Dımbık', 'Uçarı', 'Bıcırık', 'Fındık', 'Hışır', 'Uykulu', 'Zıpçık', 'Cırtlak', 'Boncuk', 'Kütür', 'Şanslı', 'Püskül', 'Sinsi', 'Şirin'];
+// ----------------------------------------------------
+
+
+// Realtime Database'i (rtdb) başlatıyoruz
+const rtdb = getDatabase(app);
+
+// Her dersin kendi anlık kullanıcı sayacının olması için yolu dinamik olarak alıyoruz
+// Örneğin /python/ sayfası için 'python' kelimesini alır
+const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
+const presenceRef = ref(rtdb, `presence/${coursePath}`);
+
+// HTML'e eklediğimiz elementleri seçiyoruz
+const userListElement = document.getElementById('presence-user-list');
+const notificationElement = document.getElementById('presence-notification');
+
+// Sayfaya giren her kullanıcı için rastgele bir isim ve ikon seçiyoruz
+const myRandomName = userNames[Math.floor(Math.random() * userNames.length)];
+const myRandomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
+
+// Online kullanıcıların anlık listesini tutmak için bir değişken
+let currentUsers = {};
+
+// 1. Kullanıcı online olduğunda çalışacak mantık
+const myConnectionRef = push(presenceRef); // Veritabanında bu kullanıcı için benzersiz bir yer oluştur
+onDisconnect(myConnectionRef).remove();      // Tarayıcı kapandığında veya bağlantı koptuğunda, bu kaydı otomatik sil
+set(myConnectionRef, { name: myRandomName, icon: myRandomIcon }); // Veritabanına kendi rastgele bilgilerimizi yaz
+
+// 2. Bildirim gösterme ve gizleme fonksiyonu
+let notificationTimeout;
+function showNotification(message, type = 'join') {
+    if (!notificationElement) return;
+    
+    clearTimeout(notificationTimeout); // Önceki bildirimi temizle
+
+    notificationElement.textContent = message;
+    notificationElement.className = type; // CSS'te '.join' veya '.leave' stilini uygular
+    
+    // 4 saniye sonra bildirimi gizle
+    notificationTimeout = setTimeout(() => {
+        notificationElement.className = 'hidden';
+    }, 4000);
+}
+
+// 3. Online kullanıcı listesini ekrana çizen fonksiyon
+function renderUserList(users) {
+    if (!userListElement) return;
+    userListElement.innerHTML = ''; // Her güncellemede listeyi temizle
+    
+    // Kullanıcı objesindeki her bir kişi için HTML oluştur
+    for (const key in users) {
+        const user = users[key];
+        const userDiv = document.createElement('div');
+        userDiv.className = 'presence-user';
+        userDiv.innerHTML = `
+            <img src="${user.icon}" alt="Kullanıcı İkonu" class="presence-icon">
+            <span class="presence-name">${user.name}</span>
+        `;
+        userListElement.appendChild(userDiv);
+    }
+}
+
+// 4. Ana Dinleyici: Veritabanındaki 'presence' listesindeki her değişikliği dinle
+onValue(presenceRef, (snapshot) => {
+    const newUsers = snapshot.val() || {}; // Gelen yeni kullanıcı listesi
+    
+    // Gelen ve ayrılan kullanıcıları tespit et ve bildirimi göster
+    // Yeni bir kullanıcı gelmişse:
+    for (const key in newUsers) {
+        if (!currentUsers[key]) {
+            // Sayfayı açan kişinin kendisi için "geldi" bildirimi gösterme
+            if (key !== myConnectionRef.key) {
+                 showNotification(`${newUsers[key].name} geldi`, 'join');
+            }
+        }
+    }
+    // Bir kullanıcı ayrılmışsa:
+    for (const key in currentUsers) {
+        if (!newUsers[key]) {
+            showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
+        }
+    }
+    
+    // Lokal kullanıcı listemizi ve ekrandaki görüntüyü güncelle
+    currentUsers = newUsers;
+    renderUserList(currentUsers);
+});
