@@ -1,8 +1,14 @@
-// Firebase SDK'lerinden gerekli fonksiyonları import et
+// =========================================================================
+// BÖLÜM 1: TÜM IMPORT'LAR
+// =========================================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getDatabase, ref, onValue, onDisconnect, set, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
+
+// =========================================================================
+// BÖLÜM 2: FIREBASE VE DEĞİŞKEN TANIMLAMALARI
+// =========================================================================
 
 // --- KENDİ FIREBASE BİLGİLERİNİZİ BURAYA YAPIŞTIRIN ---
 const firebaseConfig = {
@@ -16,50 +22,10 @@ const firebaseConfig = {
 };
 // ----------------------------------------------------
 
-// Firebase'i başlat
+// Firebase servislerini başlat
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// =========================================================================
-// YENİ: ANLIK KULLANICI GÖSTERGESİ SİSTEMİ (TEŞHİS VERSİYONU)
-// =========================================================================
-
-console.log("Teşhis: Anlık kullanıcı sistemi script'i başlıyor...");
-
-// --- HAZIRLIK: Kendi Varlıklarınızı (Assets) Buraya Girin ---
-const profileIcons = [
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/1.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/2.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/3.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/4.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/5.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/6.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/7.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/8.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/9.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/10.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/11.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/12.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/13.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/14.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/15.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/16.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/17.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/18.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/19.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/20.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/21.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/22.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/23.png'
-];
-
-// Gösterilecek rastgele kullanıcı adlarını bu diziye ekleyin
-const userNames = ['Pufpuf', 'Gıcık', 'Tırtıl', 'Zıpır', 'Laklak', 'Fırt', 'Şapşik', 'Çıtpıt', 'Pıtırtı', 'Uykucu', 'Hışır', 'Zıpzıp', 'Köpük', 'Minnoş', 'Vızvız', 'Yumuş', 'Fırfır', 'Kıpır', 'Hınzır', 'Şaşkın', 'Bıcır', 'Fıstık', 'Mırıltı', 'Pıtırcık', 'Gıdık', 'Pofidik', 'Bıcırık', 'Mırnav', 'Böcük', 'Fışfış', 'Cingil', 'Pofidik', 'Gıtır', 'Hışırtı', 'Kıvırcık', 'Pırsık', 'Dımbık', 'Uçarı', 'Bıcırık', 'Fındık', 'Hışır', 'Uykulu', 'Zıpçık', 'Cırtlak', 'Boncuk', 'Kütür', 'Şanslı', 'Püskül', 'Sinsi', 'Şirin'];
-// ----------------------------------------------------
-
-
-const rtdb = getDatabase(app);
-console.log("Teşhis: Realtime Database başarıyla başlatıldı.");
+const db = getFirestore(app); // Firestore veritabanı
+const rtdb = getDatabase(app); // Realtime Database
 
 // DOM Elementleri ve Değişkenler
 const quizContainer = document.getElementById('quiz-container');
@@ -71,11 +37,15 @@ const adminCodeInput = document.getElementById('admin-code-input');
 const modalCancelBtn = document.getElementById('modal-cancel-btn');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
 
-const ADMIN_CODE_HASH = "a2dd933588052c16311d153be5693101811c776df67af5cd7244172a0430b221";
+const ADMIN_CODE_HASH = "a2dd933588052c16311d153be5693101811c776df67af5cd7244172a0430b221"; // "btmyo" şifresinin HASH'i
 let isAdminMode = false;
 let localQuestions = [];
 
-// Girilen metni hash'leyen yardımcı fonksiyon
+
+// =========================================================================
+// BÖLÜM 3: ANA SINAV FONKSİYONLARI
+// =========================================================================
+
 async function sha256(message) {
     const msgBuffer = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -84,15 +54,12 @@ async function sha256(message) {
     return hashHex;
 }
 
-// Soruları veritabanından dinle ve işle
 onSnapshot(collection(db, 'questions'), (snapshot) => {
     localQuestions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-    // YENİ SATIR: Soruları rastgele karıştırır.
     localQuestions.sort(() => Math.random() - 0.5);
     renderQuestions(localQuestions);
 });
 
-// Tüm soruları ekrana çizen ana fonksiyon
 const renderQuestions = (questionsToRender) => {
     quizContainer.innerHTML = '';
     if (questionsToRender.length === 0) {
@@ -110,62 +77,47 @@ const renderQuestions = (questionsToRender) => {
     feather.replace({ width: '18px', height: '18px' });
 };
 
-
-// GÜNCELLENDİ: Soru kartı HTML'ini oluşturan yardımcı fonksiyon
 function createQuestionCard(q) {
     const questionCard = document.createElement('div');
     questionCard.className = 'question-card';
-
-    // YENİ: Metindeki alt satır karakterlerini (\n) HTML'in anlayacağı <br> etiketine çeviriyoruz.
     const formattedQuestion = q.question.replace(/\n/g, '<br>');
     const formattedExplanation = q.explanation ? q.explanation.replace(/\n/g, '<br>') : '';
-
     questionCard.innerHTML = `
         <div class="question-header">
-            <div class="question-content">
-                <h3>${formattedQuestion}</h3>
-            </div>
-            <div class="admin-actions">
-                ${isAdminMode ? `<button class="delete-btn" onclick="deleteQuestion('${q.id}')">Sil</button>` : ''}
-            </div>
+            <div class="question-content"><h3>${formattedQuestion}</h3></div>
+            <div class="admin-actions">${isAdminMode ? `<button class="delete-btn" onclick="deleteQuestion('${q.id}')">Sil</button>` : ''}</div>
         </div>
-        <ul class="options-list">
-            ${q.options.map(option => `<li class="option" onclick="checkAnswer(this, '${q.id}', '${option.replace(/'/g, "\\'")}')">${option}</li>`).join('')}
-        </ul>
+        <ul class="options-list">${q.options.map(option => `<li class="option" onclick="checkAnswer(this, '${q.id}', '${option.replace(/'/g, "\\'")}')">${option}</li>`).join('')}</ul>
         ${q.explanation ? `<div class="explanation-box hidden" id="explanation-${q.id}">${formattedExplanation}</div>` : ''}
     `;
     return questionCard;
 }
 
-// --- GLOBAL FONKSİYONLAR ---
 window.checkAnswer = (selectedElement, questionId, selectedAnswer) => {
     const question = localQuestions.find(q => q.id === questionId);
-    if (!question) return;
-    const questionCard = selectedElement.closest('.question-card');
-    if (questionCard.dataset.answered === 'true') return;
+    if (!question || selectedElement.closest('.question-card').dataset.answered === 'true') return;
     const isCorrect = question.correctAnswer === selectedAnswer;
     selectedElement.classList.add(isCorrect ? 'correct' : 'incorrect');
     if (isCorrect) {
+        const questionCard = selectedElement.closest('.question-card');
         questionCard.dataset.answered = 'true';
         questionCard.querySelectorAll('.option').forEach(opt => {
             opt.style.cursor = 'not-allowed';
             opt.onclick = null;
         });
         const explanationBox = document.getElementById(`explanation-${questionId}`);
-        if (explanationBox) {
-            explanationBox.classList.remove('hidden');
-        }
+        if (explanationBox) explanationBox.classList.remove('hidden');
     } else {
         setTimeout(() => selectedElement.classList.remove('incorrect'), 1000);
     }
 };
+
 window.deleteQuestion = async (questionId) => {
     if (confirm('Bu soruyu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
         await deleteDoc(doc(db, 'questions', questionId));
     }
 };
 
-// --- YÖNETİCİ PANELİ VE DİĞER OLAY DİNLEYİCİLER ---
 addQuestionForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const questionText = document.getElementById('question-text').value.trim();
@@ -200,87 +152,94 @@ const toggleAdminMode = (isAuthenticated) => {
 };
 
 shuffleBtn.addEventListener('click', () => renderQuestions([...localQuestions].sort(() => Math.random() - 0.5)));
-
 adminIcon.addEventListener('click', () => {
-    if (isAdminMode) {
-        toggleAdminMode(true);
-    } else {
-        adminModal.classList.remove('hidden');
-        adminCodeInput.focus();
-    }
+    isAdminMode ? toggleAdminMode(true) : (adminModal.classList.remove('hidden'), adminCodeInput.focus());
 });
-
 modalCancelBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
-
 modalSubmitBtn.addEventListener('click', async () => {
     const enteredCode = adminCodeInput.value;
     const enteredCodeHash = await sha256(enteredCode);
     toggleAdminMode(enteredCodeHash === ADMIN_CODE_HASH);
 });
-
 adminCodeInput.addEventListener('keyup', e => e.key === 'Enter' && modalSubmitBtn.click());
 
 
+// =========================================================================
+// BÖLÜM 4: ANLIK KULLANICI GÖSTERGESİ SİSTEMİ
+// =========================================================================
+try {
+    const profileIcons = [
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/1.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/2.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/3.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/4.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/5.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/6.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/7.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/8.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/9.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/10.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/11.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/12.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/13.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/14.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/15.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/16.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/17.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/18.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/19.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/20.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/21.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/22.png',
+        'https://coskuncancoban.github.io/mywebsitedrafts/images/23.png'
+    ];
+    // Gösterilecek rastgele kullanıcı adlarını bu diziye ekleyin
+    const userNames = ['Pufpuf', 'Gıcık', 'Tırtıl', 'Zıpır', 'Laklak', 'Fırt', 'Şapşik', 'Çıtpıt', 'Pıtırtı', 'Uykucu', 'Hışır', 'Zıpzıp', 'Köpük', 'Minnoş', 'Vızvız', 'Yumuş', 'Fırfır', 'Kıpır', 'Hınzır', 'Şaşkın', 'Bıcır', 'Fıstık', 'Mırıltı', 'Pıtırcık', 'Gıdık', 'Pofidik', 'Bıcırık', 'Mırnav', 'Böcük', 'Fışfış', 'Cingil', 'Pofidik', 'Gıtır', 'Hışırtı', 'Kıvırcık', 'Pırsık', 'Dımbık', 'Uçarı', 'Bıcırık', 'Fındık', 'Hışır', 'Uykulu', 'Zıpçık', 'Cırtlak', 'Boncuk', 'Kütür', 'Şanslı', 'Püskül', 'Sinsi', 'Şirin'];
 
-const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
-console.log("Teşhis: Algılanan ders yolu (coursePath):", coursePath);
-
-const presenceRef = ref(rtdb, `presence/${coursePath}`);
-
-const userListElement = document.getElementById('presence-user-list');
-const notificationElement = document.getElementById('presence-notification');
-
-const myRandomName = userNames[Math.floor(Math.random() * userNames.length)];
-const myRandomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
-
-let currentUsers = {};
-
-const myConnectionRef = push(presenceRef);
-console.log("Teşhis: Bu kullanıcı için benzersiz ID oluşturuldu:", myConnectionRef.key);
-
-onDisconnect(myConnectionRef).remove();
-set(myConnectionRef, { name: myRandomName, icon: myRandomIcon });
-
-let notificationTimeout;
-function showNotification(message, type = 'join') {
-    if (!notificationElement) return;
-    clearTimeout(notificationTimeout);
-    notificationElement.textContent = message;
-    notificationElement.className = type;
-    notificationTimeout = setTimeout(() => {
-        notificationElement.className = 'hidden';
-    }, 4000);
-}
-
-function renderUserList(users) {
-    if (!userListElement) return;
-    userListElement.innerHTML = '';
-    for (const key in users) {
-        const user = users[key];
-        const userDiv = document.createElement('div');
-        userDiv.className = 'presence-user';
-        userDiv.innerHTML = `<img src="${user.icon}" alt="Kullanıcı İkonu" class="presence-icon"><span class="presence-name">${user.name}</span>`;
-        userListElement.appendChild(userDiv);
+    const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
+    const presenceRef = ref(rtdb, `presence/${coursePath}`);
+    const userListElement = document.getElementById('presence-user-list');
+    const notificationElement = document.getElementById('presence-notification');
+    const myRandomName = userNames[Math.floor(Math.random() * userNames.length)];
+    const myRandomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
+    let currentUsers = {};
+    const myConnectionRef = push(presenceRef);
+    onDisconnect(myConnectionRef).remove();
+    set(myConnectionRef, { name: myRandomName, icon: myRandomIcon });
+    let notificationTimeout;
+    function showNotification(message, type = 'join') {
+        if (!notificationElement) return;
+        clearTimeout(notificationTimeout);
+        notificationElement.textContent = message;
+        notificationElement.className = type;
+        notificationTimeout = setTimeout(() => { notificationElement.className = 'hidden'; }, 4000);
     }
-}
-
-onValue(presenceRef, (snapshot) => {
-    const userCount = snapshot.numChildren();
-    console.log(`Teşhis: Veritabanından veri alındı. Anlık aktif kullanıcı sayısı: ${userCount}`);
-    
-    const newUsers = snapshot.val() || {};
-    for (const key in newUsers) {
-        if (!currentUsers[key] && key !== myConnectionRef.key) {
-            showNotification(`${newUsers[key].name} geldi`, 'join');
+    function renderUserList(users) {
+        if (!userListElement) return;
+        userListElement.innerHTML = '';
+        for (const key in users) {
+            const user = users[key];
+            const userDiv = document.createElement('div');
+            userDiv.className = 'presence-user';
+            userDiv.innerHTML = `<img src="${user.icon}" alt="Kullanıcı İkonu" class="presence-icon"><span class="presence-name">${user.name}</span>`;
+            userListElement.appendChild(userDiv);
         }
     }
-    for (const key in currentUsers) {
-        if (!newUsers[key]) {
-            showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
+    onValue(presenceRef, (snapshot) => {
+        const newUsers = snapshot.val() || {};
+        for (const key in newUsers) {
+            if (!currentUsers[key] && key !== myConnectionRef.key) {
+                showNotification(`${newUsers[key].name} geldi`, 'join');
+            }
         }
-    }
-    currentUsers = newUsers;
-    renderUserList(currentUsers);
-});
-
-
+        for (const key in currentUsers) {
+            if (!newUsers[key]) {
+                showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
+            }
+        }
+        currentUsers = newUsers;
+        renderUserList(currentUsers);
+    });
+} catch (error) {
+    console.error("Anlık kullanıcı sisteminde bir hata oluştu:", error);
+}
