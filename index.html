@@ -5,12 +5,44 @@
     <meta charset="UTF-8">
     <title>Testler</title>
     <style>
+        /* YENİ: CSS Reset ve Evrensel Kural */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Reset Bitişi */
+
         body {
             font-family: sans-serif;
             background-color: #111827;
             color: #fff;
             text-align: center;
-            padding-top: 50px;
+
+            /* Sticky Footer ve Tam Ekran için Gerekli Kurallar */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            /* Yatay kaydırmayı kesin olarak engeller */
+            padding: 50px 20px 0;
+        }
+
+        /* Ana içerik alanının dikeyde büyümesini sağlar */
+        main.menu {
+            flex-grow: 1;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 40px;
         }
 
         a {
@@ -18,11 +50,44 @@
             text-decoration: none;
             font-size: 1.5rem;
             display: block;
-            margin: 20px;
+            margin: 20px auto;
+            /* Sol ve sağ margin'i auto yapar */
+            padding: 15px;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            max-width: 400px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
         }
 
         a:hover {
-            text-decoration: underline;
+            background-color: #1f2937;
+            border-color: #4b5563;
+        }
+
+        footer {
+            /* Bu sihirli satır, yukarıdaki tüm boş alanı doldurarak footer'ı en aşağıya iter */
+            margin-top: auto;
+
+            padding: 40px 20px;
+            border-top: 1px solid #374151;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0 0 10px 0;
+        }
+
+        footer a {
+            font-size: 1rem;
+            color: #a5b4fc;
+            /* Diğer a etiketlerinden farklı stil özellikleri */
+            margin: 0;
+            display: inline;
+            padding: 0;
+            border: none;
+            max-width: none;
         }
     </style>
     <!-- Google tag (gtag.js) -->
@@ -42,7 +107,13 @@
     <a href="/mywebsitedrafts/python_I/">Python Programlama I</a>
     <a href="/mywebsitedrafts/isg_I/">İş Sağlığı ve Güvenliği I</a>
     <a href="/mywebsitedrafts/muze/">Müze Kültürü</a>
-
+    <footer>
+        <p>İçerikler amatör sayfa çalışmalarımdır. Hata bildirmek ya da öneride bulunmak isterseniz lütfen iletişime
+            geçin
+        </p>
+        <a href="mailto:coskuncancoban@gmail.com">coskuncancoban@gmail.com</a>
+    </footer>
+</body>
 </body>
 
 </html>
