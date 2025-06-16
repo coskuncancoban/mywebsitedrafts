@@ -278,8 +278,7 @@ header {
 
 .options-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    /* 5 seçenek için tek sütun daha düzenli durur */
+    grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
 
@@ -450,4 +449,102 @@ header {
 
 .hidden {
     display: none !important;
+}
+
+/* =============================================== */
+/* YENİ: ANLIK KULLANICI GÖSTERGESİ STİLLERİ (SAYFA İÇİ VERSİYON) */
+/* =============================================== */
+
+/* Ana kapsayıcı artık sayfa akışının bir parçası */
+.presence-container {
+    position: relative;
+    /* Bildirimlerin konumlanması için gerekli */
+    width: 100%;
+    /* Yaklaşık iki sıra ikon ve isme yetecek kadar minimum yükseklik ayırır */
+    min-height: 140px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    /* Sorularla arasına boşluk koyar */
+    /* Arka plan, çerçeve ve kaydırma çubuğu kaldırıldı */
+}
+
+/* Kullanıcı listesi, kullanıcıları yan yana ve gerektiğinde alt satıra saracak */
+#presence-user-list {
+    display: flex;
+    flex-wrap: wrap;
+    /* ÖNEMLİ: Kullanıcıları yan yana sıralar ve sığmazsa alt satıra atar */
+    gap: 16px;
+    /* İkonlar arası boşluk */
+    justify-content: center;
+    /* İkonları yatayda ortalar */
+    align-items: flex-start;
+}
+
+/* Tek bir kullanıcının (ikon + isim) kapsayıcısı */
+.presence-user {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.presence-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+}
+
+.presence-name {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+/* Geldi/Ayrıldı bildirim balonu */
+#presence-notification {
+    position: absolute;
+    /* .presence-container'a göre konumlanır */
+    top: -15px;
+    /* Kapsayıcının biraz üzerinde */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-green);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease, top 0.5s ease;
+    pointer-events: none;
+}
+
+#presence-notification:not(.hidden) {
+    opacity: 1;
+    top: -25px;
+    /* Yukarı doğru çıkış efekti */
+}
+
+#presence-notification.leave {
+    background-color: var(--accent-red);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
