@@ -1,7 +1,6 @@
 // Firebase SDK'lerinden gerekli fonksiyonları import et
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import { getDatabase, ref, onValue, onDisconnect, set, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // --- KENDİ FIREBASE BİLGİLERİNİZİ BURAYA YAPIŞTIRIN ---
 const firebaseConfig = {
@@ -18,41 +17,6 @@ const firebaseConfig = {
 // Firebase'i başlat
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-const profileIcons = [
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/1.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/2.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/3.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/4.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/5.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/6.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/7.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/8.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/9.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/10.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/11.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/12.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/13.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/14.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/15.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/16.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/17.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/18.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/19.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/20.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/21.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/22.png',
-    'https://coskuncancoban.github.io/mywebsitedrafts/images/23.png'
-];
-
-// Gösterilecek rastgele kullanıcı adlarını bu diziye ekleyin
-const userNames = ['Pufpuf', 'Gıcık', 'Tırtıl', 'Zıpır', 'Laklak', 'Fırt', 'Şapşik', 'Çıtpıt', 'Pıtırtı', 'Uykucu', 'Hışır', 'Zıpzıp', 'Köpük', 'Minnoş', 'Vızvız', 'Yumuş', 'Fırfır', 'Kıpır', 'Hınzır', 'Şaşkın', 'Bıcır', 'Fıstık', 'Mırıltı', 'Pıtırcık', 'Gıdık', 'Pofidik', 'Bıcırık', 'Mırnav', 'Böcük', 'Fışfış', 'Cingil', 'Pofidik', 'Gıtır', 'Hışırtı', 'Kıvırcık', 'Pırsık', 'Dımbık', 'Uçarı', 'Bıcırık', 'Fındık', 'Hışır', 'Uykulu', 'Zıpçık', 'Cırtlak', 'Boncuk', 'Kütür', 'Şanslı', 'Püskül', 'Sinsi', 'Şirin'];
-// ----------------------------------------------------
-
-
-// Realtime Database'i (rtdb) başlatıyoruz
-const rtdb = getDatabase(app);
-
 
 // DOM Elementleri ve Değişkenler
 const quizContainer = document.getElementById('quiz-container');
@@ -213,72 +177,109 @@ modalSubmitBtn.addEventListener('click', async () => {
 
 adminCodeInput.addEventListener('keyup', e => e.key === 'Enter' && modalSubmitBtn.click());
 
+// =========================================================================
+// YENİ: ANLIK KULLANICI GÖSTERGESİ SİSTEMİ (TEŞHİS VERSİYONU)
+// =========================================================================
+import { getDatabase, ref, onValue, onDisconnect, set, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
+console.log("Teşhis: Anlık kullanıcı sistemi script'i başlıyor...");
 
+// --- HAZIRLIK: Kendi Varlıklarınızı (Assets) Buraya Girin ---
+const profileIcons = [
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/1.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/2.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/3.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/4.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/5.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/6.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/7.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/8.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/9.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/10.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/11.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/12.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/13.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/14.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/15.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/16.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/17.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/18.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/19.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/20.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/21.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/22.png',
+    'https://coskuncancoban.github.io/mywebsitedrafts/images/23.png'
+];
 
-// Her dersin kendi anlık kullanıcı sayacının olması için yolu dinamik olarak alıyoruz
-const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
-const presenceRef = ref(rtdb, `presence/${coursePath}`);
+// Gösterilecek rastgele kullanıcı adlarını bu diziye ekleyin
+const userNames = ['Pufpuf', 'Gıcık', 'Tırtıl', 'Zıpır', 'Laklak', 'Fırt', 'Şapşik', 'Çıtpıt', 'Pıtırtı', 'Uykucu', 'Hışır', 'Zıpzıp', 'Köpük', 'Minnoş', 'Vızvız', 'Yumuş', 'Fırfır', 'Kıpır', 'Hınzır', 'Şaşkın', 'Bıcır', 'Fıstık', 'Mırıltı', 'Pıtırcık', 'Gıdık', 'Pofidik', 'Bıcırık', 'Mırnav', 'Böcük', 'Fışfış', 'Cingil', 'Pofidik', 'Gıtır', 'Hışırtı', 'Kıvırcık', 'Pırsık', 'Dımbık', 'Uçarı', 'Bıcırık', 'Fındık', 'Hışır', 'Uykulu', 'Zıpçık', 'Cırtlak', 'Boncuk', 'Kütür', 'Şanslı', 'Püskül', 'Sinsi', 'Şirin'];
+// ----------------------------------------------------
 
-// HTML'e eklediğimiz elementleri seçiyoruz
-const userListElement = document.getElementById('presence-user-list');
-const notificationElement = document.getElementById('presence-notification');
+try {
+    const rtdb = getDatabase(app);
+    console.log("Teşhis: Realtime Database başarıyla başlatıldı.");
 
-// Sayfaya giren her kullanıcı için rastgele bir isim ve ikon seçiyoruz
-const myRandomName = userNames[Math.floor(Math.random() * userNames.length)];
-const myRandomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
+    const coursePath = window.location.pathname.replace(/\//g, '') || 'anasayfa';
+    console.log("Teşhis: Algılanan ders yolu (coursePath):", coursePath);
+    
+    const presenceRef = ref(rtdb, `presence/${coursePath}`);
 
-// Online kullanıcıların anlık listesini tutmak için bir değişken
-let currentUsers = {};
+    const userListElement = document.getElementById('presence-user-list');
+    const notificationElement = document.getElementById('presence-notification');
 
-// 1. Kullanıcı online olduğunda çalışacak mantık
-const myConnectionRef = push(presenceRef); // Veritabanında bu kullanıcı için benzersiz bir yer oluştur
-onDisconnect(myConnectionRef).remove();      // Tarayıcı kapandığında bu kaydı otomatik sil
-set(myConnectionRef, { name: myRandomName, icon: myRandomIcon }); // Veritabanına kendi bilgilerimizi yaz
+    const myRandomName = userNames[Math.floor(Math.random() * userNames.length)];
+    const myRandomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
 
-// 2. Bildirim gösterme ve gizleme fonksiyonu
-let notificationTimeout;
-function showNotification(message, type = 'join') {
-    if (!notificationElement) return;
-    clearTimeout(notificationTimeout);
-    notificationElement.textContent = message;
-    notificationElement.className = type;
-    notificationTimeout = setTimeout(() => {
-        notificationElement.className = 'hidden';
-    }, 4000);
-}
+    let currentUsers = {};
 
-// 3. Online kullanıcı listesini ekrana çizen fonksiyon
-function renderUserList(users) {
-    if (!userListElement) return;
-    userListElement.innerHTML = '';
-    for (const key in users) {
-        const user = users[key];
-        const userDiv = document.createElement('div');
-        userDiv.className = 'presence-user';
-        userDiv.innerHTML = `
-            <img src="${user.icon}" alt="Kullanıcı İkonu" class="presence-icon">
-            <span class="presence-name">${user.name}</span>
-        `;
-        userListElement.appendChild(userDiv);
+    const myConnectionRef = push(presenceRef);
+    console.log("Teşhis: Bu kullanıcı için benzersiz ID oluşturuldu:", myConnectionRef.key);
+
+    onDisconnect(myConnectionRef).remove();
+    set(myConnectionRef, { name: myRandomName, icon: myRandomIcon });
+
+    let notificationTimeout;
+    function showNotification(message, type = 'join') {
+        if (!notificationElement) return;
+        clearTimeout(notificationTimeout);
+        notificationElement.textContent = message;
+        notificationElement.className = type;
+        notificationTimeout = setTimeout(() => {
+            notificationElement.className = 'hidden';
+        }, 4000);
     }
-}
 
-// 4. Ana Dinleyici: Veritabanındaki 'presence' listesindeki her değişikliği dinle
-onValue(presenceRef, (snapshot) => {
-    const newUsers = snapshot.val() || {};
-    // Gelen ve ayrılan kullanıcıları tespit et
-    for (const key in newUsers) {
-        if (!currentUsers[key] && key !== myConnectionRef.key) {
-            showNotification(`${newUsers[key].name} geldi`, 'join');
+    function renderUserList(users) {
+        if (!userListElement) return;
+        userListElement.innerHTML = '';
+        for (const key in users) {
+            const user = users[key];
+            const userDiv = document.createElement('div');
+            userDiv.className = 'presence-user';
+            userDiv.innerHTML = `<img src="${user.icon}" alt="Kullanıcı İkonu" class="presence-icon"><span class="presence-name">${user.name}</span>`;
+            userListElement.appendChild(userDiv);
         }
     }
-    for (const key in currentUsers) {
-        if (!newUsers[key]) {
-            showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
+
+    onValue(presenceRef, (snapshot) => {
+        const userCount = snapshot.numChildren();
+        console.log(`Teşhis: Veritabanından veri alındı. Anlık aktif kullanıcı sayısı: ${userCount}`);
+        
+        const newUsers = snapshot.val() || {};
+        for (const key in newUsers) {
+            if (!currentUsers[key] && key !== myConnectionRef.key) {
+                showNotification(`${newUsers[key].name} geldi`, 'join');
+            }
         }
-    }
-    // Mevcut kullanıcı listesini ve arayüzü güncelle
-    currentUsers = newUsers;
-    renderUserList(currentUsers);
-});
+        for (const key in currentUsers) {
+            if (!newUsers[key]) {
+                showNotification(`${currentUsers[key].name} ayrıldı`, 'leave');
+            }
+        }
+        currentUsers = newUsers;
+        renderUserList(currentUsers);
+    });
+
+} catch (error) {
+    console.error("Teşhis: Anlık kullanıcı sisteminde KRİTİK HATA oluştu!", error);
+}
