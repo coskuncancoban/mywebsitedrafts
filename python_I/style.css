@@ -452,30 +452,32 @@ header {
 }
 
 /* =============================================== */
-/* YENİ: ANLIK KULLANICI GÖSTERGESİ STİLLERİ      */
+/* YENİ: ANLIK KULLANICI GÖSTERGESİ STİLLERİ (SAYFA İÇİ VERSİYON) */
 /* =============================================== */
 
-/* Ana kapsayıcıyı ekranın sağ üstüne sabitler */
+/* Ana kapsayıcı artık sayfa akışının bir parçası */
 .presence-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    /* Diğer tüm elementlerin üzerinde olmasını sağlar */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    position: relative;
+    /* Bildirimlerin konumlanması için gerekli */
+    width: 100%;
+    /* Yaklaşık iki sıra ikon ve isme yetecek kadar minimum yükseklik ayırır */
+    min-height: 140px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    /* Sorularla arasına boşluk koyar */
+    /* Arka plan, çerçeve ve kaydırma çubuğu kaldırıldı */
 }
 
-/* Kullanıcı listesinin kendisi */
+/* Kullanıcı listesi, kullanıcıları yan yana ve gerektiğinde alt satıra saracak */
 #presence-user-list {
     display: flex;
-    flex-direction: column;
-    /* İkonları alt alta dizer */
-    gap: 8px;
+    flex-wrap: wrap;
+    /* ÖNEMLİ: Kullanıcıları yan yana sıralar ve sığmazsa alt satıra atar */
+    gap: 16px;
     /* İkonlar arası boşluk */
-    align-items: center;
+    justify-content: center;
+    /* İkonları yatayda ortalar */
+    align-items: flex-start;
 }
 
 /* Tek bir kullanıcının (ikon + isim) kapsayıcısı */
@@ -485,21 +487,17 @@ header {
     align-items: center;
     gap: 4px;
     animation: fadeIn 0.5s ease-in-out;
-    /* Yeni kullanıcı geldiğinde yumuşak bir giriş efekti */
 }
 
-/* Dairesel profil ikonu */
 .presence-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     object-fit: cover;
-    /* Resmin daireye tam sığmasını sağlar */
 }
 
-/* Kullanıcı adı metni */
 .presence-name {
     font-size: 0.7rem;
     color: var(--text-secondary);
@@ -510,6 +508,12 @@ header {
 
 /* Geldi/Ayrıldı bildirim balonu */
 #presence-notification {
+    position: absolute;
+    /* .presence-container'a göre konumlanır */
+    top: -15px;
+    /* Kapsayıcının biraz üzerinde */
+    left: 50%;
+    transform: translateX(-50%);
     background-color: var(--accent-green);
     color: white;
     padding: 5px 10px;
@@ -517,27 +521,22 @@ header {
     font-size: 0.8rem;
     font-weight: 500;
     white-space: nowrap;
+    z-index: 10;
     opacity: 0;
-    transform: translateY(20px);
-    /* Aşağıdan gelme efekti için başlangıç pozisyonu */
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.5s ease, top 0.5s ease;
     pointer-events: none;
-    /* Üzerine tıklanmasını engeller */
 }
 
-/* Bildirim göründüğünde uygulanacak stiller */
 #presence-notification:not(.hidden) {
     opacity: 1;
-    transform: translateY(0);
-    /* Normal pozisyonuna gelir */
+    top: -25px;
+    /* Yukarı doğru çıkış efekti */
 }
 
-/* Ayrılan kullanıcılar için bildirim rengi */
 #presence-notification.leave {
     background-color: var(--accent-red);
 }
 
-/* Yeni kullanıcılar için giriş animasyonu */
 @keyframes fadeIn {
     from {
         opacity: 0;
