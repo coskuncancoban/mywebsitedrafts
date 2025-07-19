@@ -1,0 +1,40 @@
+/* Temel sıfırlamalar ve sayfa kurulumu */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* Kaydırma çubuklarını engeller */
+}
+
+/* Sayfa içeriğini dikey ve yatayda tam ortalamak için */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000000;
+    /* Geçişlerin daha pürüzsüz görünmesi için eklendi */
+    transition: background-color 0.5s linear;
+}
+
+/* Geri sayım sayacının stili */
+#countdown {
+    font-family: "Alumni Sans Pinstripe", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #FFFFFF;
+    font-size: 8vw;
+    text-align: center;
+    text-shadow: none;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Daha küçük ekranlar için yazı boyutu */
+@media (max-width: 600px) {
+    #countdown {
+        font-size: 9vw;
+    }
+}
