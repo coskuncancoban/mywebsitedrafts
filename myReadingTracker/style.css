@@ -1,0 +1,243 @@
+/* --- Cozy & Vintage (Extra Dark) CSS - SON HALİ --- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500&display=swap');
+
+:root {
+    --bg-color: #141210;
+    --container-bg: #221e1a;
+    --text-color: #dcd3b8;
+    --text-muted: #a09681;
+    --accent-color: #e8a87c;
+    --danger-color: #c97571;
+    /* Silme butonu varsayılan rengi */
+    --danger-hover-color: #ff9e9a;
+    /* Silme butonu hover rengi */
+    --border-color: #332d27;
+    --progress-bar-bg: #4a4137;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.book-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 80%;
+}
+
+.book-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    /* Her bir kitabın genişliğini buradan ayarlıyoruz */
+}
+
+.book-slot {
+    background-color: var(--container-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+.book-wrapper:hover .book-slot {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.45);
+}
+
+.add-button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+}
+
+#add-book-btn {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    opacity: 0.05;
+    transition: all 0s ease-in-out;
+}
+
+#add-book-btn:hover {
+    opacity: 0.1;
+}
+
+/* --- YENİ SİLME BUTONU STİLİ --- */
+.delete-btn {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    background-color: transparent;
+    /* Arka plan yok */
+    color: var(--danger-color);
+    border: none;
+    border-radius: 0;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(1);
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.book-wrapper:hover .delete-btn {
+    opacity: 0.2;
+}
+
+.delete-btn:hover {
+    color: var(--danger-hover-color);
+    /* Rengi daha parlak yap */
+    transform: scale(1.5);
+    /* Biraz büyüt */
+}
+
+.drop-zone {
+    position: relative;
+    width: 100%;
+    padding-top: 150%;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 6px 6px 0 0;
+}
+
+.book-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.page-tracker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.page-count {
+    font-size: 1.25rem;
+    font-weight: 500;
+    font-family: 'Playfair Display', serif;
+    min-width: 40px;
+    text-align: center;
+}
+
+.btn {
+    opacity: 0;
+    transition: all 0.2s ease;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    font-size: 1.5rem;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.book-wrapper:hover .btn {
+    opacity: 1;
+}
+
+.btn:hover {
+    color: var(--accent-color);
+}
+
+.progress-container {
+    padding-top: 5px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.book-wrapper:hover .progress-container {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--progress-bar-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--accent-color);
+    border-radius: 4px;
+    transition: width 0.3s ease-out;
+}
+
+.total-pages-container {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    text-align: center;
+}
+
+.total-pages-input {
+    width: 50px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color);
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.total-pages-input:focus {
+    outline: none;
+    border-bottom-color: var(--accent-color);
+}
+
+@media (max-width: 640px) {
+    .book-container {
+        gap: 20px;
+    }
+}
