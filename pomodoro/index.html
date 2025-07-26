@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Zamanlayıcı</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <button class="settings-btn" id="settings-btn" aria-label="Ayarları Aç">
+            <i class="fa-solid fa-gear"></i>
+        </button>
+
+        <div class="timer">
+            <div class="mode-display" id="mode-display">Çalışma Zamanı</div>
+            <div class="time-display" id="time-display">25:00</div>
+            <div class="progress-container">
+                <div class="progress-dots" id="progress-dots"></div>
+                <button id="reset-cycle-btn" class="progress-reset-btn" title="Döngüyü Sıfırla">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="start-pause-btn" data-state="paused">Başlat</button>
+            <button id="reset-btn"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+
+        <div class="task-container">
+            <p class="task-title">Bugünün Görevi</p>
+            <ul id="task-list"></ul>
+            <div class="task-input-wrapper">
+                <input type="text" id="task-input" placeholder="Yeni bir görev ekle...">
+                <button id="add-task-btn">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-content">
+            <h2>Ayarlar</h2>
+            <div class="setting-item">
+                <label for="pomodoro-time">Pomodoro (dk)</label>
+                <input type="number" id="pomodoro-time" min="1">
+            </div>
+            <div class="setting-item">
+                <label for="short-break-time">Kısa Mola (dk)</label>
+                <input type="number" id="short-break-time" min="1">
+            </div>
+            <div class="setting-item">
+                <label for="long-break-time">Uzun Mola (dk)</label>
+                <input type="number" id="long-break-time" min="1">
+            </div>
+            <div class="setting-item">
+                <label for="long-break-interval">Uzun Mola Aralığı</label>
+                <input type="number" id="long-break-interval" min="1">
+            </div>
+            <div class="setting-item">
+                <label for="auto-start-toggle">Otomatik Başlat</label>
+                <label class="switch">
+                    <input type="checkbox" id="auto-start-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <button id="save-settings-btn">Kaydet</button>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreen-overlay">
+        <div class="overlay-content">
+            <h1 id="overlay-message"></h1>
+        </div>
+    </div>
+
+    <audio id="notification-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-clear-interface-bell-435.mp3"
+        preload="auto"></audio>
+
+    <div id="color-palette-container" class="color-palette-container">
+    </div>
+</body>
+
+</html>
