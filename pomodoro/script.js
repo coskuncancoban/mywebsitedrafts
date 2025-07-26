@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullscreenOverlay = document.getElementById('fullscreen-overlay');
     const overlayMessage = document.getElementById('overlay-message');
     const notificationSound = document.getElementById('notification-sound');
-    const colorPaletteContainer = document.getElementById('color-palette-container'); // Yeni
-    const root = document.documentElement; // Yeni
+    const colorPaletteContainer = document.getElementById('color-palette-container');
+    const root = document.documentElement;
 
     // Durum ve Ayarlar
     let state = {
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: 'pomodoro',
         pomodorosCompleted: 0,
         timeLeft: 25 * 60,
+        endTime: 0 // YENİ: Bitiş zamanını tutacak
     };
 
     let settings = {
@@ -41,8 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let tasks = [];
-
-// YENİ: Renk Seçenekleri
+    
     const colorOptions = [
         { name: 'Dingin Yeşil', color: '#4E9C81', hover: '#62b99c' },
         { name: 'Antik Altın', color: '#e8a87c', hover: '#f0b98d' },
@@ -50,71 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Odak Kırmızısı', color: '#c97571', hover: '#d98f8c' },
         { name: 'Lavanta Moru', color: '#8e7cc3', hover: '#a494d4' },
     ];
-
-    // --- RENK PALETİ FONKSİYONLARI ---
-    
-    const changeAccentColor = (color, hoverColor) => {
-        root.style.setProperty('--accent-color', color);
-        root.style.setProperty('--accent-hover', hoverColor);
-        localStorage.setItem('pomodoroAccentColor', color);
-        localStorage.setItem('pomodoroAccentHoverColor', hoverColor);
-    };
-
-    const createColorPalette = () => {
-        colorOptions.forEach(option => {
-            const swatch = document.createElement('div');
-            swatch.classList.add('color-swatch');
-            swatch.style.backgroundColor = option.color;
-            swatch.title = option.name;
-            swatch.addEventListener('click', () => {
-                changeAccentColor(option.color, option.hover);
-                // Aktif olan rengi işaretle
-                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-                swatch.classList.add('active');
-            });
-            colorPaletteContainer.appendChild(swatch);
-        });
-    };
-    
-    const loadAccentColor = () => {
-        const savedColor = localStorage.getItem('pomodoroAccentColor');
-        const savedHoverColor = localStorage.getItem('pomodoroAccentHoverColor');
-        if (savedColor && savedHoverColor) {
-            changeAccentColor(savedColor, savedHoverColor);
-        }
-        // Aktif rengi işaretle
-        const currentActiveColor = root.style.getPropertyValue('--accent-color').trim();
-        document.querySelectorAll('.color-swatch').forEach(swatch => {
-            if (swatch.style.backgroundColor === currentActiveColor) {
-                swatch.classList.add('active');
-            }
-        });
-    };
-
-    // --- OTURUM YÖNETİMİ FONKSİYONLARI ---
-
-    const saveState = () => {
-        const stateToSave = {
-            mode: state.mode,
-            pomodorosCompleted: state.pomodorosCompleted,
-            timeLeft: state.timeLeft,
-        };
-        localStorage.setItem('pomodoroState', JSON.stringify(stateToSave));
-    };
-
-    const loadState = () => {
-        const savedState = localStorage.getItem('pomodoroState');
-        if (savedState) {
-            const parsedState = JSON.parse(savedState);
-            state = { ...state, ...parsedState };
-        }
-    };
-
-    window.addEventListener('beforeunload', () => {
-        if (state.isRunning) {
-            saveState();
-        }
-    });
 
     // --- TEMEL FONKSİYONLAR ---
 
@@ -134,18 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
         startPauseBtn.dataset.state = 'paused';
 
         switch (newMode) {
-            case 'pomodoro':
-                state.timeLeft = settings.pomodoroTime * 60;
-                modeDisplay.textContent = 'Çalışma Zamanı';
-                break;
-            case 'shortBreak':
-                state.timeLeft = settings.shortBreakTime * 60;
-                modeDisplay.textContent = 'Kısa Mola';
-                break;
-            case 'longBreak':
-                state.timeLeft = settings.longBreakTime * 60;
-                modeDisplay.textContent = 'Uzun Mola';
-                break;
+            case 'pomodoro': state.timeLeft = settings.pomodoroTime * 60; modeDisplay.textContent = 'Çalışma Zamanı'; break;
+            case 'shortBreak': state.timeLeft = settings.shortBreakTime * 60; modeDisplay.textContent = 'Kısa Mola'; break;
+            case 'longBreak': state.timeLeft = settings.longBreakTime * 60; modeDisplay.textContent = 'Uzun Mola'; break;
         }
 
         saveState();
@@ -153,14 +79,23 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgressDots();
     };
 
+    // --- YENİ VE DAHA HASSAS ZAMANLAYICI MANTIĞI ---
     const startTimer = () => {
         if (state.isRunning) return;
+
+        // Bitiş zamanını SADECE zamanlayıcı durmuşken yeniden hesapla
+        state.endTime = Date.now() + (state.timeLeft * 1000);
+        
         state.isRunning = true;
         startPauseBtn.textContent = 'Durdur';
         startPauseBtn.dataset.state = 'running';
 
         state.timerId = setInterval(() => {
-            state.timeLeft--;
+            // Her saniye körü körüne 1 azaltmak yerine,
+            // bitiş zamanına ne kadar kaldığını gerçek saate göre hesapla
+            const newTimeLeft = Math.round((state.endTime - Date.now()) / 1000);
+            state.timeLeft = newTimeLeft > 0 ? newTimeLeft : 0; // Negatif olmasını engelle
+
             updateTimeDisplay();
 
             if (state.timeLeft <= 0) {
@@ -191,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const pauseTimer = () => {
+        // state.timeLeft zaten her saniye güncellendiği için doğru değeri tutuyor
         state.isRunning = false;
         clearInterval(state.timerId);
         startPauseBtn.textContent = 'Başlat';
@@ -198,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     };
 
+    // resetTimer fonksiyonu doğru çalışmaya devam edecek
     const resetTimer = () => {
         pauseTimer();
         switch (state.mode) {
@@ -209,14 +146,26 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimeDisplay();
     };
 
+    // --- DİĞER FONKSİYONLAR (DEĞİŞİKLİK YOK) ---
+    // (Aşağıdaki fonksiyonların içeriğinde bir değişiklik yapılmadı,
+    // ancak tam ve çalışır bir kod olması için hepsi burada yer alıyor)
+
+    const saveState = () => {
+        const stateToSave = { mode: state.mode, pomodorosCompleted: state.pomodorosCompleted, timeLeft: state.timeLeft };
+        localStorage.setItem('pomodoroState', JSON.stringify(stateToSave));
+    };
+    const loadState = () => {
+        const savedState = localStorage.getItem('pomodoroState');
+        if (savedState) { state = { ...state, ...JSON.parse(savedState) }; }
+    };
+    window.addEventListener('beforeunload', () => { if (state.isRunning) saveState(); });
+
     const updateProgressDots = () => {
         progressDots.innerHTML = '';
         for (let i = 0; i < settings.longBreakInterval; i++) {
             const dot = document.createElement('div');
             dot.classList.add('dot');
-            if (i < state.pomodorosCompleted) {
-                dot.classList.add('completed');
-            }
+            if (i < state.pomodorosCompleted) dot.classList.add('completed');
             dot.dataset.index = i;
             dot.addEventListener('click', (e) => {
                 const index = parseInt(e.target.dataset.index);
@@ -227,56 +176,40 @@ document.addEventListener('DOMContentLoaded', () => {
             progressDots.appendChild(dot);
         }
     };
-    
-    const resetCycle = () => {
-        pauseTimer();
-        state.pomodorosCompleted = 0;
-        switchMode('pomodoro');
-    };
-
+    const resetCycle = () => { pauseTimer(); state.pomodorosCompleted = 0; switchMode('pomodoro'); };
     const showNotification = (message) => {
         overlayMessage.textContent = message;
         fullscreenOverlay.classList.add('visible');
-        setTimeout(() => {
-            fullscreenOverlay.classList.remove('visible');
-        }, 3000);
+        setTimeout(() => { fullscreenOverlay.classList.remove('visible'); }, 3000);
     };
-
     const saveSettings = () => {
         settings.pomodoroTime = parseInt(pomodoroTimeInput.value) || 25;
         settings.shortBreakTime = parseInt(shortBreakTimeInput.value) || 5;
         settings.longBreakTime = parseInt(longBreakTimeInput.value) || 15;
         settings.longBreakInterval = parseInt(longBreakIntervalInput.value) || 4;
         settings.autoStart = autoStartToggle.checked;
-        
         localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
         settingsModal.classList.remove('visible');
-        
         if (!state.isRunning) {
-            state.pomodorosCompleted = 0; // Ayarlar değişince döngüyü sıfırla
+            state.pomodorosCompleted = 0;
             switchMode('pomodoro');
-            updateProgressDots();
         }
     };
-
     const loadSettings = () => {
         const savedSettings = localStorage.getItem('pomodoroSettings');
-        if (savedSettings) {
-            settings = JSON.parse(savedSettings);
-        }
+        if (savedSettings) settings = JSON.parse(savedSettings);
         pomodoroTimeInput.value = settings.pomodoroTime;
         shortBreakTimeInput.value = settings.shortBreakTime;
         longBreakTimeInput.value = settings.longBreakTime;
         longBreakIntervalInput.value = settings.longBreakInterval;
         autoStartToggle.checked = settings.autoStart;
     };
-
     const renderTasks = () => {
         taskList.innerHTML = '';
         tasks.forEach((task, index) => {
             const li = document.createElement('li');
             li.textContent = task.text;
-            if (task.completed) { li.classList.add('completed'); }
+            if (task.completed) li.classList.add('completed');
             li.dataset.index = index;
             li.addEventListener('click', () => toggleTask(index));
             const deleteBtn = document.createElement('button');
@@ -286,50 +219,56 @@ document.addEventListener('DOMContentLoaded', () => {
             taskList.appendChild(li);
         });
     };
-
     const addTask = () => {
         const taskText = taskInput.value.trim();
-        if (taskText) {
-            tasks.push({ text: taskText, completed: false });
-            taskInput.value = '';
-            saveTasks();
-            renderTasks();
-        }
+        if (taskText) { tasks.push({ text: taskText, completed: false }); taskInput.value = ''; saveTasks(); renderTasks(); }
     };
-    
-    const toggleTask = (index) => {
-        tasks[index].completed = !tasks[index].completed;
-        saveTasks();
-        renderTasks();
-    };
-    
-    const deleteTask = (index) => {
-        tasks.splice(index, 1);
-        saveTasks();
-        renderTasks();
-    };
-
+    const toggleTask = (index) => { tasks[index].completed = !tasks[index].completed; saveTasks(); renderTasks(); };
+    const deleteTask = (index) => { tasks.splice(index, 1); saveTasks(); renderTasks(); };
     const saveTasks = () => localStorage.setItem('pomodoroTasks', JSON.stringify(tasks));
-
     const loadTasks = () => {
         const savedTasks = localStorage.getItem('pomodoroTasks');
-        if (savedTasks) { tasks = JSON.parse(savedTasks); }
+        if (savedTasks) tasks = JSON.parse(savedTasks);
         renderTasks();
     };
+    const changeAccentColor = (color, hoverColor) => {
+        root.style.setProperty('--accent-color', color);
+        root.style.setProperty('--accent-hover', hoverColor);
+        localStorage.setItem('pomodoroAccentColor', color);
+        localStorage.setItem('pomodoroAccentHoverColor', hoverColor);
+    };
+    const createColorPalette = () => {
+        colorOptions.forEach(option => {
+            const swatch = document.createElement('div');
+            swatch.classList.add('color-swatch');
+            swatch.style.backgroundColor = option.color;
+            swatch.title = option.name;
+            swatch.addEventListener('click', () => {
+                changeAccentColor(option.color, option.hover);
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+            });
+            colorPaletteContainer.appendChild(swatch);
+        });
+    };
+    const loadAccentColor = () => {
+        const savedColor = localStorage.getItem('pomodoroAccentColor');
+        const savedHoverColor = localStorage.getItem('pomodoroAccentHoverColor');
+        if (savedColor && savedHoverColor) changeAccentColor(savedColor, savedHoverColor);
+        const currentActiveColor = root.style.getPropertyValue('--accent-color').trim();
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            if (swatch.style.backgroundColor === currentActiveColor) swatch.classList.add('active');
+        });
+    };
 
+    // --- İLK YÜKLEME ---
     const initializeApp = () => {
-        createColorPalette(); // Renk paletini oluştur
+        createColorPalette();
         loadSettings();
         loadTasks();
         loadState();
-        loadAccentColor(); // Kayıtlı rengi yükle
-        
-        modeDisplay.textContent = {
-            pomodoro: 'Çalışma Zamanı',
-            shortBreak: 'Kısa Mola',
-            longBreak: 'Uzun Mola'
-        }[state.mode] || 'Çalışma Zamanı';
-
+        loadAccentColor();
+        modeDisplay.textContent = { pomodoro: 'Çalışma Zamanı', shortBreak: 'Kısa Mola', longBreak: 'Uzun Mola' }[state.mode] || 'Çalışma Zamanı';
         updateTimeDisplay();
         updateProgressDots();
     };
