@@ -1,10 +1,38 @@
+// =========================================================================
+// BÖLÜM 1: FIREBASE KURULUMU
+// =========================================================================
+
+// --- KENDİ FIREBASE BİLGİLERİNİZİ BURAYA YAPIŞTIRIN ---
+
+const firebaseConfig = {
+    apiKey: "AIzaSyC02gtpAVVPjugLBo2POxaxl6hHq8n9Ofg",
+    authDomain: "github-mywebsitedrafts.firebaseapp.com",
+    projectId: "github-mywebsitedrafts",
+    storageBucket: "github-mywebsitedrafts.firebasestorage.app",
+    messagingSenderId: "554051400137",
+    appId: "1:554051400137:web:16a5ebde5deb7b0b187818",
+    measurementId: "G-7R6G23563M",
+    databaseURL: "https://github-mywebsitedrafts-default-rtdb.europe-west1.firebasedatabase.app/"
+};
+// ----------------------------------------------------
+
+// Firebase'i başlat
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const booksCollection = db.collection('books');
+
+
+// =========================================================================
+// BÖLÜM 2: UYGULAMA MANTIĞI
+// =========================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
     const bookContainer = document.querySelector('.book-container');
     const addBookBtn = document.getElementById('add-book-btn');
-    let books = JSON.parse(localStorage.getItem('books')) || [];
 
-    const saveBooks = () => localStorage.setItem('books', JSON.stringify(books));
+    let books = []; // Verileri yerel olarak tutmak için dizi
 
+    // Kitapları arayüze döken ana fonksiyon
     const renderBooks = () => {
         bookContainer.innerHTML = '';
         books.forEach(book => {
@@ -15,16 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAllProgressBars();
     };
 
+    // Her bir kitap için HTML yapısını oluşturan fonksiyon
     const createBookWrapper = (book) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'book-wrapper';
-        wrapper.dataset.id = book.id;
+        wrapper.dataset.id = book.id; // Firestore'dan gelen ID'yi kullanıyoruz
 
-        // Determine if total pages input should be shown or just text
         let totalPagesHTML;
         if (book.totalPages > 0) {
-            // New, cleaner display for total pages
-            totalPagesHTML = `<span>Total: ${book.totalPages}</span>`; 
+            totalPagesHTML = `<span>Total: ${book.totalPages}</span>`;
         } else {
             totalPagesHTML = `Total: <input type="number" class="total-pages-input" placeholder="###">`;
         }
@@ -53,21 +80,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return wrapper;
     };
 
+    // [YENİ] Firestore'a yeni bir kitap ekler
     const addBook = () => {
-        const newBook = { id: Date.now(), imgSrc: '', pages: 0, totalPages: 0 };
-        books.push(newBook);
-        saveBooks();
-        renderBooks();
+        const newBook = {
+            imgSrc: '',
+            pages: 0,
+            totalPages: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp() // Sıralama için oluşturma tarihi
+        };
+        booksCollection.add(newBook); // .then() ve .catch() ile hata kontrolü eklenebilir
     };
 
-    const updateBook = (bookId, property, value) => {
-        const book = books.find(b => b.id === bookId);
-        if (book) {
-            book[property] = value;
-            saveBooks();
-        }
+    // [YENİ] Firestore'daki bir kitabı günceller
+    const updateBook = (bookId, data) => {
+        booksCollection.doc(bookId).update(data);
     };
 
+    // [YENİ] Firestore'dan bir kitabı siler
+    const deleteBook = (bookId) => {
+        booksCollection.doc(bookId).delete();
+    };
+    
+    // İlerleme çubuğunu günceller (Bu fonksiyon aynı kalabilir)
     const updateProgressBar = (bookId) => {
         const book = books.find(b => b.id === bookId);
         const wrapper = document.querySelector(`.book-wrapper[data-id='${bookId}']`);
@@ -80,65 +114,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateAllProgressBars = () => books.forEach(book => updateProgressBar(book.id));
 
+    // Olay dinleyicilerini ekler
     const addEventListeners = () => {
         document.querySelectorAll('.book-wrapper').forEach(wrapper => {
-            const bookId = parseInt(wrapper.dataset.id);
+            const bookId = wrapper.dataset.id;
             if (!bookId) return;
+            
+            const book = books.find(b => b.id === bookId);
+            if(!book) return;
 
+            // Silme butonu
             wrapper.querySelector('.delete-btn').addEventListener('click', () => {
-                books = books.filter(book => book.id !== bookId);
-                saveBooks();
-                renderBooks();
+                deleteBook(bookId);
             });
 
-            const pageCountEl = wrapper.querySelector('.page-count');
+            // Sayfa artırma
             wrapper.querySelector('.plus').addEventListener('click', () => {
-                const book = books.find(b => b.id === bookId);
-                book.pages++;
-                pageCountEl.textContent = book.pages;
-                updateProgressBar(bookId);
-                saveBooks();
+                updateBook(bookId, { pages: book.pages + 1 });
             });
 
+            // Sayfa azaltma
             wrapper.querySelector('.minus').addEventListener('click', () => {
-                const book = books.find(b => b.id === bookId);
                 if (book.pages > 0) {
-                    book.pages--;
-                    pageCountEl.textContent = book.pages;
-                    updateProgressBar(bookId);
-                    saveBooks();
+                    updateBook(bookId, { pages: book.pages - 1 });
                 }
             });
 
+            // Toplam sayfa sayısı girişi
             const totalPagesInput = wrapper.querySelector('.total-pages-input');
             if (totalPagesInput) {
                 totalPagesInput.addEventListener('change', (e) => {
                     const newTotal = parseInt(e.target.value);
                     if (newTotal > 0) {
-                        updateBook(bookId, 'totalPages', newTotal);
-                        renderBooks();
+                        updateBook(bookId, { totalPages: newTotal });
                     }
                 });
             }
 
-            wrapper.querySelector('.drop-zone').addEventListener('drop', (e) => {
+            // Resim sürükle-bırak
+            const dropZone = wrapper.querySelector('.drop-zone');
+            dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 const file = e.dataTransfer.files[0];
                 if (file && file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = () => {
-                        updateBook(bookId, 'imgSrc', reader.result);
-                        const currentBook = books.find(b => b.id === bookId);
-                        renderBooks();
+                        updateBook(bookId, { imgSrc: reader.result });
                     };
                     reader.readAsDataURL(file);
                 }
             });
 
-            wrapper.querySelector('.drop-zone').addEventListener('dragover', e => e.preventDefault());
+            dropZone.addEventListener('dragover', e => e.preventDefault());
         });
     };
-
+    
     addBookBtn.addEventListener('click', addBook);
-    renderBooks();
+
+    // [ANA DEĞİŞİKLİK] Firestore'daki değişiklikleri dinle
+    booksCollection.orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        books = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderBooks();
+    });
 });
